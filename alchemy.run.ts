@@ -21,9 +21,12 @@ export default Alchemy.Stack(
   Effect.gen(function* () {
     const { stage } = yield* Alchemy.Stack;
     // public/ holds life.apl and client.js, served as they are. Any other path, `/` included,
-    // runs src/worker.ts, which hands it to the Durable Object `Life`: one per stage.
+    // runs src/worker.ts, which hands it to the Durable Object `Life`: one per stage. `prod` also
+    // serves maybeapl.tsx.md, a custom domain in the tsx.md zone of the same Cloudflare account;
+    // previews stay on workers.dev.
     const site = yield* Cloudflare.Worker("Site", {
       name: stage === "prod" ? "maybeitwasapl" : `maybeitwasapl-${stage}`,
+      domain: stage === "prod" ? "maybeapl.tsx.md" : undefined,
       main: "./src/worker.ts",
       assets: {
         directory: "./public",
