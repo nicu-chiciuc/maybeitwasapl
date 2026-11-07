@@ -35,6 +35,9 @@ export default Alchemy.Stack(
       env: {
         Life: Cloudflare.DurableObject<Life>("Life"),
       },
+      // The board stores nothing, so a deploy restarts it at once instead of waiting up to five
+      // minutes for it to go idle with the old life.apl loaded.
+      codeUpdateStrategy: { mode: "immediate" },
       compatibility: { date: "2026-11-01" },
     });
 
