@@ -36,6 +36,6 @@ page←{
   top←top,'<h1>This website was built in APL.</h1>'
   top←top,'<p>No React, no JSX, no framework. Just APL, on the server too.</p>'
   top←top,'<p>Everyone sees the same board. Click a cell to flip it.</p>'
-  end←'<p><a href="/life.apl">View the APL source</a> · runs on <a href="https://github.com/abrudz/ngn-apl">ngn/apl</a> in a Cloudflare Durable Object</p>'
+  end←'<p><a href="/life.apl">View the APL source</a> · <a href="https://github.com/nicu-chiciuc/maybeitwasapl">GitHub</a> · runs on <a href="https://github.com/abrudz/ngn-apl">ngn/apl</a> in a Cloudflare Durable Object</p>'
   top,'<section id="life">',(⍺ frame ⍵),'</section>',end,'</main><script src="/client.js"></script></html>'
 }
