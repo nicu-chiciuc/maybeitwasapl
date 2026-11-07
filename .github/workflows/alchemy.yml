@@ -1,0 +1,157 @@
+# Deploys the site with the Alchemy stack in alchemy.run.ts. A push to main deploys the stage
+# `prod`. A pull request from this repository deploys the stage `pr-<number>`, a Worker of its own,
+# and keeps one comment with its URL; closing the pull request destroys that stage. The state of
+# every stage is in the `alchemy-state-store` project of the Convex team. This workflow never
+# destroys `prod`, and has no way to.
+name: Alchemy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+  # Run on main with plan to see what a deploy would do, and run once with adopt to take over a
+  # Worker that exists but is not in the state of the stage `prod`.
+  workflow_dispatch:
+    inputs:
+      adopt:
+        description: Adopt resources that exist but are not in state yet
+        type: boolean
+        default: false
+      plan:
+        description: Show the plan and change nothing
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+# One run per stage at a time: the state store has no lock. Pending runs wait in order instead of
+# replacing each other, so the destroy of a closed pull request waits for its running deploy.
+concurrency:
+  group:
+    alchemy-${{ github.event.pull_request.number && format('pr-{0}',
+    github.event.pull_request.number) || github.ref_name }}
+  queue: max
+  cancel-in-progress: false
+
+env:
+  # The stage, as https://alchemy.run/environments/ci names it: `pr-<number>` for a pull request,
+  # `prod` on main, and the branch name otherwise, where no job below runs.
+  STAGE:
+    ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.number) || (github.ref
+    == 'refs/heads/main' && 'prod' || github.ref_name) }}
+
+jobs:
+  deploy:
+    name: Deploy ${{ github.event_name == 'pull_request' && 'the preview' || 'production' }}
+    if: >-
+      github.event.action != 'closed' && (github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository || github.event_name !=
+      'pull_request' && github.ref == 'refs/heads/main')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      pull-requests: write # The job keeps one comment with the URL of the preview.
+
+    steps:
+      # The branch head, not the default merge commit of a pull request: the preview is the branch,
+      # and the head check below compares the checkout with it.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      # A re-run of an old run must not put older code over newer code. The job token lets git read
+      # the repository; the deploy does not get it.
+      - name: Check that the checkout is the head of the branch
+        env:
+          BRANCH: ${{ github.head_ref || github.ref_name }}
+          TOKEN: ${{ github.token }}
+        run: |
+          auth=$(printf 'x-access-token:%s' "$TOKEN" | base64 | tr -d '\n')
+          head=$(git -c "http.extraheader=AUTHORIZATION: basic $auth" ls-remote origin "refs/heads/$BRANCH" | cut -f1)
+          if [ "$(git rev-parse HEAD)" != "$head" ]; then
+            echo "::error::The checkout is not the head of $BRANCH ($head). Nothing was deployed."
+            exit 1
+          fi
+
+      - name: Show the plan
+        if: inputs.plan
+        run: pnpm exec alchemy plan --stage "$STAGE" --no-input $ADOPT
+        env:
+          ADOPT: ${{ inputs.adopt && '--adopt' || '' }}
+          CONVEX_ACCESS_TOKEN: ${{ secrets.CONVEX_ACCESS_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      # --detect-drift compares the Worker with the live account, so a setting changed in the
+      # dashboard is repaired. ADOPT is the workflow_dispatch input, empty otherwise.
+      - name: Deploy
+        if: ${{ !inputs.plan }}
+        run: pnpm exec alchemy deploy --stage "$STAGE" --yes --no-input --detect-drift $ADOPT
+        env:
+          ADOPT: ${{ inputs.adopt && '--adopt' || '' }}
+          CONVEX_ACCESS_TOKEN: ${{ secrets.CONVEX_ACCESS_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      # One comment with the stacks of the repository, from the state that the deploy just wrote.
+      - name: Update the stack comment
+        if: github.event_name == 'pull_request'
+        run: pnpm exec alchemy-convex stack-comment
+        env:
+          CONVEX_ACCESS_TOKEN: ${{ secrets.CONVEX_ACCESS_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
+
+  destroy:
+    name: Destroy the preview
+    # A pull request from a fork got no preview.
+    if: >-
+      github.event_name == 'pull_request' && github.event.action == 'closed' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      # The base branch, not the pull request head: a head whose install fails, such as one with a
+      # stale lockfile, must not keep the preview. The stack of the base branch destroys the stage
+      # from its state.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.base.ref }}
+          persist-credentials: false
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+
+      # The stage comes from the number of the pull request, so this step cannot name `prod`.
+      - name: Destroy the preview
+        run: pnpm exec alchemy destroy --stage "pr-$NUMBER" --yes --no-input
+        env:
+          NUMBER: ${{ github.event.pull_request.number }}
+          CONVEX_ACCESS_TOKEN: ${{ secrets.CONVEX_ACCESS_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+  fork:
+    name: Skip the preview of a fork
+    if: >-
+      github.event_name == 'pull_request' && github.event.action != 'closed' &&
+      github.event.pull_request.head.repo.full_name != github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+
+    steps:
+      - name: Explain the skip
+        run: echo "::notice::No preview. A pull request from a fork gets no secrets."

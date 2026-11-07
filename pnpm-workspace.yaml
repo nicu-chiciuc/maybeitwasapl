@@ -1,0 +1,6 @@
+allowBuilds:
+  esbuild: true
+  workerd: true
+minimumReleaseAgeExclude:
+  # Our own releases, which this repository may install as soon as they are published.
+  - "@samebase/*"
