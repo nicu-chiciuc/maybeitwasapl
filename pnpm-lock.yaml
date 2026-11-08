@@ -15,8 +15,8 @@ importers:
         specifier: 4.1.2
         version: 4.1.2(effect@4.1.2)(redis@6.3.1)
       '@samebase/alchemy-convex':
-        specifier: 0.35.0
-        version: 0.35.0(@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.1))(alchemy@2.0.0-beta.85(@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.1))(effect@4.1.2)(ws@8.22.1))(convex@1.48.0)(effect@4.1.2)
+        specifier: 0.37.0
+        version: 0.37.0(@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.1))(alchemy@2.0.0-beta.85(@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.1))(effect@4.1.2)(ws@8.22.1))(convex@1.48.0)(effect@4.1.2)
       alchemy:
         specifier: 2.0.0-beta.85
         version: 2.0.0-beta.85(@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.1))(effect@4.1.2)(ws@8.22.1)
@@ -691,8 +691,8 @@ packages:
   '@rolldown/pluginutils@1.0.1':
     resolution: {integrity: sha512-2j9bGt5Jh8hj+vPtgzPtl72j0yRxHAyumoo6TNfAjsLB04UtpSvPbPcDcBMxz7n+9CYB0c1GxQFxYRg2jimqGw==}
 
-  '@samebase/alchemy-convex@0.35.0':
-    resolution: {integrity: sha512-sIZunyy8wd26kfkb8cpWF8OZbIj8QqO4IlhwMvuqFMXHfFu6E4jjlCEpuSytRlJInzRKWp6ampM5z5p86WvPKw==}
+  '@samebase/alchemy-convex@0.37.0':
+    resolution: {integrity: sha512-/tDvkcPfwG/dArzUNGcMpnO4Ej9NXSdzX6Ud5q2bxJjDTuv/eoPwpjac9R4HwcNXkr58Tv8utn2ZxyRB4RiuRw==}
     engines: {node: '>=22'}
     hasBin: true
     peerDependencies:
@@ -1382,7 +1382,7 @@ snapshots:
 
   '@rolldown/pluginutils@1.0.1': {}
 
-  '@samebase/alchemy-convex@0.35.0(@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.1))(alchemy@2.0.0-beta.85(@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.1))(effect@4.1.2)(ws@8.22.1))(convex@1.48.0)(effect@4.1.2)':
+  '@samebase/alchemy-convex@0.37.0(@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.1))(alchemy@2.0.0-beta.85(@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.1))(effect@4.1.2)(ws@8.22.1))(convex@1.48.0)(effect@4.1.2)':
     dependencies:
       '@convex-dev/platform': 0.1.11
       '@effect/platform-node': 4.1.2(effect@4.1.2)(redis@6.3.1)
