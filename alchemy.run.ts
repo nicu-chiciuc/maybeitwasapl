@@ -16,7 +16,7 @@ export default Alchemy.Stack(
   "nicu-chiciuc/maybeitwasapl",
   {
     providers: Cloudflare.providers(),
-    state: Convex.state(),
+    state: Convex.withRunRecord(Convex.state()),
   },
   Effect.gen(function* () {
     const { stage } = yield* Alchemy.Stack;
