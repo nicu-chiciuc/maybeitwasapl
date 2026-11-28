@@ -17,6 +17,9 @@ importers:
       '@samebase/alchemy-convex':
         specifier: 0.44.0
         version: 0.44.0(@effect/platform-node@4.1.4(effect@4.1.4)(redis@6.3.1))(alchemy@2.0.0-beta.87(@effect/platform-node@4.1.4(effect@4.1.4)(redis@6.3.1))(effect@4.1.4)(ws@8.22.1))(convex@1.48.0)(effect@4.1.4)
+      '@samebase/alchemy-kit':
+        specifier: 0.8.0
+        version: 0.8.0(alchemy@2.0.0-beta.87(@effect/platform-node@4.1.4(effect@4.1.4)(redis@6.3.1))(effect@4.1.4)(ws@8.22.1))(effect@4.1.4)
       alchemy:
         specifier: 2.0.0-beta.87
         version: 2.0.0-beta.87(@effect/platform-node@4.1.4(effect@4.1.4)(redis@6.3.1))(effect@4.1.4)(ws@8.22.1)
@@ -706,6 +709,14 @@ packages:
   '@samebase/alchemy-kit@0.6.0':
     resolution: {integrity: sha512-gwuUxqUEo4l7/wdNxw3yifG/JUVxe0Aev9qg2ZQIbR7lQ5KZsgBiAwq1gbUg5EWNKa5/SakbZb3r4AZ0hbmefA==}
     engines: {node: '>=22'}
+    peerDependencies:
+      alchemy: 2.0.0-beta.87
+      effect: ^4.1.4
+
+  '@samebase/alchemy-kit@0.8.0':
+    resolution: {integrity: sha512-hUMR52c4BaV2vKvZK8F4l5vy7VF8b6SPB6wXmRV9l5D+ftUNzST/UzxSqj8+ENLZTJCrcDYeghKgPm2x6Y8khA==}
+    engines: {node: '>=22'}
+    hasBin: true
     peerDependencies:
       alchemy: 2.0.0-beta.87
       effect: ^4.1.4
@@ -1408,6 +1419,11 @@ snapshots:
       effect: 4.1.4
 
   '@samebase/alchemy-kit@0.6.0(alchemy@2.0.0-beta.87(@effect/platform-node@4.1.4(effect@4.1.4)(redis@6.3.1))(effect@4.1.4)(ws@8.22.1))(effect@4.1.4)':
+    dependencies:
+      alchemy: 2.0.0-beta.87(@effect/platform-node@4.1.4(effect@4.1.4)(redis@6.3.1))(effect@4.1.4)(ws@8.22.1)
+      effect: 4.1.4
+
+  '@samebase/alchemy-kit@0.8.0(alchemy@2.0.0-beta.87(@effect/platform-node@4.1.4(effect@4.1.4)(redis@6.3.1))(effect@4.1.4)(ws@8.22.1))(effect@4.1.4)':
     dependencies:
       alchemy: 2.0.0-beta.87(@effect/platform-node@4.1.4(effect@4.1.4)(redis@6.3.1))(effect@4.1.4)(ws@8.22.1)
       effect: 4.1.4
