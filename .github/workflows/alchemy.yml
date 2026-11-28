@@ -28,7 +28,7 @@ permissions:
 
 jobs:
   alchemy:
-    uses: samebase/samebase/.github/workflows/alchemy-deploy.yml@bbdd3934972b842de8280206efcaa49288bf8413
+    uses: samebase/samebase/.github/workflows/alchemy-deploy.yml@01d2bd218777c0a049310b61c7f19260a12b616d
     permissions:
       contents: read
       pull-requests: write
